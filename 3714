@@ -1,0 +1,63 @@
+class Solution:
+    def longestBalanced(self, s):
+        n = len(s)
+        ans = 1
+        
+        # Case 1: single character blocks
+        count = 1
+        for i in range(1, n):
+            if s[i] == s[i-1]:
+                count += 1
+            else:
+                ans = max(ans, count)
+                count = 1
+        ans = max(ans, count)
+        
+        # Helper for 2-character balance
+        def two_char(c1, c2):
+            prefix = 0
+            first = {0: -1}
+            best = 0
+            
+            for i, ch in enumerate(s):
+                if ch == c1:
+                    prefix += 1
+                elif ch == c2:
+                    prefix -= 1
+                else:
+                    # reset if third character appears
+                    prefix = 0
+                    first = {0: i}
+                    continue
+                
+                if prefix in first:
+                    best = max(best, i - first[prefix])
+                else:
+                    first[prefix] = i
+            
+            return best
+        
+        # Case 2: pairs
+        ans = max(ans, two_char('a', 'b'))
+        ans = max(ans, two_char('a', 'c'))
+        ans = max(ans, two_char('b', 'c'))
+        
+        # Case 3: all three equal
+        A = B = C = 0
+        seen = {(0, 0): -1}
+        
+        for i, ch in enumerate(s):
+            if ch == 'a':
+                A += 1
+            elif ch == 'b':
+                B += 1
+            else:
+                C += 1
+            
+            key = (A - B, A - C)
+            if key in seen:
+                ans = max(ans, i - seen[key])
+            else:
+                seen[key] = i
+        
+        return ans
