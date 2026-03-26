@@ -1,0 +1,97 @@
+class Solution:
+    def canPartitionGrid(self, grid):
+        m, n = len(grid), len(grid[0])
+
+        total = sum(sum(row) for row in grid)
+
+        # Pre-store positions of each value
+        from collections import defaultdict
+        pos = defaultdict(list)
+
+        for i in range(m):
+            for j in range(n):
+                pos[grid[i][j]].append((i, j))
+
+        # -------- Horizontal Cuts --------
+        prefix = 0
+
+        for i in range(m - 1):
+            prefix += sum(grid[i])
+
+            sumA = prefix
+            sumB = total - prefix
+
+            if sumA == sumB:
+                return True
+
+            diff = abs(sumA - sumB)
+
+            if diff not in pos:
+                continue
+
+            # Check positions
+            for r, c in pos[diff]:
+                if sumA > sumB:
+                    # must be in top section
+                    if r <= i:
+                        rows, cols = i + 1, n
+                        if rows > 1 and cols > 1:
+                            return True
+                        if rows == 1 and (c == 0 or c == cols - 1):
+                            return True
+                        if cols == 1 and (r == 0 or r == rows - 1):
+                            return True
+                else:
+                    # must be in bottom section
+                    if r > i:
+                        rows, cols = m - i - 1, n
+                        nr = r - (i + 1)
+
+                        if rows > 1 and cols > 1:
+                            return True
+                        if rows == 1 and (c == 0 or c == cols - 1):
+                            return True
+                        if cols == 1 and (nr == 0 or nr == rows - 1):
+                            return True
+
+        # -------- Vertical Cuts --------
+        col_prefix = [0] * m
+
+        for j in range(n - 1):
+            for i in range(m):
+                col_prefix[i] += grid[i][j]
+
+            sumA = sum(col_prefix)
+            sumB = total - sumA
+
+            if sumA == sumB:
+                return True
+
+            diff = abs(sumA - sumB)
+
+            if diff not in pos:
+                continue
+
+            for r, c in pos[diff]:
+                if sumA > sumB:
+                    if c <= j:
+                        rows, cols = m, j + 1
+                        if rows > 1 and cols > 1:
+                            return True
+                        if cols == 1 and (r == 0 or r == rows - 1):
+                            return True
+                        if rows == 1 and (c == 0 or c == cols - 1):
+                            return True
+                else:
+                    if c > j:
+                        rows, cols = m, n - j - 1
+                        nc = c - (j + 1)
+
+                        if rows > 1 and cols > 1:
+                            return True
+                        if cols == 1 and (r == 0 or r == rows - 1):
+                            return True
+                        if rows == 1 and (nc == 0 or nc == cols - 1):
+                            return True
+
+        return False
