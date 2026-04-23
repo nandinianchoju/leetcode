@@ -1,0 +1,28 @@
+from collections import defaultdict
+
+class Solution:
+    def distance(self, nums):
+        groups = defaultdict(list)
+        
+        # Step 1: group indices
+        for i, num in enumerate(nums):
+            groups[num].append(i)
+        
+        res = [0] * len(nums)
+        
+        # Step 2: process each group
+        for idxs in groups.values():
+            prefix = [0]
+            
+            # build prefix sum
+            for x in idxs:
+                prefix.append(prefix[-1] + x)
+            
+            n = len(idxs)
+            
+            for i in range(n):
+                left = i * idxs[i] - prefix[i]
+                right = (prefix[n] - prefix[i+1]) - (n - i - 1) * idxs[i]
+                res[idxs[i]] = left + right
+        
+        return res
