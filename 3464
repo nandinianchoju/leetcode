@@ -1,0 +1,60 @@
+import bisect
+
+class Solution:
+    def maxDistance(self, side: int, points: list[list[int]], k: int) -> int:
+        # Map 2D → 1D
+        def map_point(x, y):
+            if x == 0:
+                return y
+            elif y == side:
+                return side + x
+            elif x == side:
+                return 3 * side - y
+            else:
+                return 4 * side - x
+
+        arr = sorted(map_point(x, y) for x, y in points)
+        n = len(arr)
+        perimeter = 4 * side
+
+        # Duplicate for circular
+        arr = arr + [x + perimeter for x in arr]
+
+        # Optimized check
+        def can(d):
+            for i in range(n):
+                count = 1
+                first = arr[i]
+                last = arr[i]
+                idx = i
+
+                while count < k:
+                    # 🔥 jump using binary search
+                    nxt = bisect.bisect_left(arr, last + d, idx + 1, i + n)
+                    if nxt >= i + n:
+                        break
+
+                    last = arr[nxt]
+                    idx = nxt
+                    count += 1
+
+                if count == k:
+                    # circular check
+                    if perimeter - (last - first) >= d:
+                        return True
+
+            return False
+
+        # Binary search
+        low, high = 0, 2 * side
+        ans = 0
+
+        while low <= high:
+            mid = (low + high) // 2
+            if can(mid):
+                ans = mid
+                low = mid + 1
+            else:
+                high = mid - 1
+
+        return ans
