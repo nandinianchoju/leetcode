@@ -1,0 +1,41 @@
+class Solution:
+    def maxScore(self, grid, k):
+        m, n = len(grid), len(grid[0])
+        
+        # mapping
+        def get(val):
+            if val == 0:
+                return 0, 0
+            elif val == 1:
+                return 1, 1
+            else:
+                return 2, 1
+        
+        # dp[i][j][cost]
+        dp = [[[-float('inf')] * (k + 1) for _ in range(n)] for _ in range(m)]
+        
+        # start
+        s, c = get(grid[0][0])
+        if c <= k:
+            dp[0][0][c] = s
+        
+        for i in range(m):
+            for j in range(n):
+                s, c = get(grid[i][j])
+                
+                for cost in range(c, k + 1):
+                    
+                    if i > 0 and dp[i-1][j][cost - c] != -float('inf'):
+                        dp[i][j][cost] = max(
+                            dp[i][j][cost],
+                            dp[i-1][j][cost - c] + s
+                        )
+                    
+                    if j > 0 and dp[i][j-1][cost - c] != -float('inf'):
+                        dp[i][j][cost] = max(
+                            dp[i][j][cost],
+                            dp[i][j-1][cost - c] + s
+                        )
+        
+        ans = max(dp[m-1][n-1])
+        return ans if ans != -float('inf') else -1
